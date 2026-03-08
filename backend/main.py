@@ -7,6 +7,7 @@ Run with: uvicorn backend.main:app --reload --port 8000
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.chatbot.router import router as chat_router
 from backend.profile_scoring.router import router as profile_router
 
 app = FastAPI(
@@ -30,6 +31,9 @@ app.add_middleware(
 
 # Mount profile scoring routes
 app.include_router(profile_router, prefix="/api")
+
+# Mount chatbot routes
+app.include_router(chat_router, prefix="/api")
 
 @app.get("/")
 async def root():

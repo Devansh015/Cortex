@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useProfile } from '@/context/ProfileContext'
 import UploadPanel from '@/components/UploadPanel'
+import ChatBot from '@/components/ChatBot'
 
 // Dynamic import for Three.js components (requires client-side only)
 const BrainScene = dynamic(() => import('@/components/BrainScene'), {
@@ -128,6 +129,9 @@ export default function Home() {
           </button>
         </div>
       )}
+
+      {/* AI Chatbot */}
+      <ChatBot />
     </main>
   )
 }
