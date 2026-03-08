@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { useProfile } from '@/context/ProfileContext'
 import UploadPanel from '@/components/UploadPanel'
 import ChatBot from '@/components/ChatBot'
+import { useCallback } from 'react'
 
 // Dynamic import for Three.js components (requires client-side only)
 const BrainScene = dynamic(() => import('@/components/BrainScene'), {
@@ -21,8 +22,13 @@ export default function Home() {
   const [showUploadPanel, setShowUploadPanel] = useState(false)
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
   const [triggerAnimation, setTriggerAnimation] = useState(false)
+  const [chatPanelOpen, setChatPanelOpen] = useState(false)
   const scoresChangedWhilePanelOpen = useRef(false)
   const prevScoresRef = useRef(regionScores)
+
+  const handleChatPanelToggle = useCallback((open: boolean) => {
+    setChatPanelOpen(open)
+  }, [])
 
   // Detect score changes while panel is open
   useEffect(() => {
@@ -64,7 +70,7 @@ export default function Home() {
           <div className="text-white/90 font-semibold text-xl tracking-tight">
             LUMAS
           </div>
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 transition-all duration-300 ${chatPanelOpen ? 'mr-[396px]' : ''}`}>
             <button
               onClick={resetSession}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2"
@@ -131,7 +137,7 @@ export default function Home() {
       )}
 
       {/* AI Chatbot */}
-      <ChatBot />
+      <ChatBot onPanelToggle={handleChatPanelToggle} />
     </main>
   )
 }
