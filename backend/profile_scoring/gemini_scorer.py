@@ -78,6 +78,7 @@ SCORING_PROMPT_TEMPLATE = """Score this content's relevance to CS categories.
 Categories: {categories}
 
 Scale: 0.0=none, 0.3=mentioned, 0.6=demonstrated, 1.0=expert.
+For GitHub repos: infer skills from languages, frameworks, file structure, and project type — not just explicit mentions.
 Only include categories scoring >0. Return compact JSON:
 {{"s":{{"key":float,...}}}}
 
@@ -315,6 +316,20 @@ _KEYWORD_MAP: Dict[str, list[str]] = {
     "networking":          ["network", "tcp", "udp", "http", "socket", "ip "],
     "git":                 ["git", "commit", "branch", "merge", "pull request", "repo"],
     "testing":             ["test", "unittest", "pytest", "assert", "mock", "tdd"],
+    "ci_cd":               ["ci/cd", "pipeline", "github actions", "jenkins", "deploy", "continuous"],
+    "docker_containers":   ["docker", "container", "kubernetes", "k8s", "compose", "image"],
+    "cloud_infra":         ["aws", "azure", "gcp", "cloud", "s3", "ec2", "lambda", "serverless"],
+    "html_css":            ["html", "css", "stylesheet", "flexbox", "grid", "tailwind", "sass"],
+    "javascript_ts":       ["javascript", "typescript", "js ", "ts ", "node", "npm", "es6"],
+    "react":               ["react", "component", "jsx", "tsx", "hooks", "useState", "nextjs", "next.js", "vue", "angular", "svelte"],
+    "responsive_design":   ["responsive", "mobile", "media query", "accessibility", "a11y", "viewport"],
+    "ui_ux":               ["ui", "ux", "design", "figma", "wireframe", "prototype", "user experience"],
+    "documentation":       ["documentation", "readme", "docstring", "jsdoc", "wiki", "changelog"],
+    "project_management":  ["agile", "scrum", "kanban", "sprint", "backlog", "jira", "trello", "project management"],
+    "system_design":       ["system design", "architecture", "scalab", "load balancer", "microservice", "monolith", "distributed"],
+    "prototyping":         ["prototype", "mvp", "hackathon", "proof of concept", "poc", "demo", "rapid"],
+    "integrations":        ["integration", "third-party", "sdk", "webhook", "oauth", "stripe", "firebase", "supabase"],
+    "problem_solving":     ["problem solving", "debug", "troubleshoot", "creative", "innovative", "solution"],
 }
 
 

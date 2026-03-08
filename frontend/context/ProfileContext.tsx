@@ -51,16 +51,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ProfileState>({
     userId: '',
     profile: null,
-    regionScores: {
-      Region_Frontend: 0,
-      Region_Backend: 0,
-      Region_AI: 0,
-      Region_Data: 0,
-      Region_Systems: 0,
-      Region_DevOps: 0,
-      Region_Product: 0,
-      Region_Hackathon: 0,
-    },
+    regionScores: {} as Record<FrontendRegion, number>,
     uploads: [],
     isLoading: true,
     isUploading: false,

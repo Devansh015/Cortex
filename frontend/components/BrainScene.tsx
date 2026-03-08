@@ -8,14 +8,15 @@ import LowPolyBrain from './LowPolyBrain'
 
 // ── Default proficiency levels (fallback when no data) ──────────
 const DEFAULT_PROFICIENCY: Record<string, number> = {
-  Region_Frontend:  0.15,
-  Region_Product:   0.15,
-  Region_Backend:   0.15,
-  Region_Systems:   0.15,
-  Region_AI:        0.15,
-  Region_Data:      0.15,
-  Region_DevOps:    0.15,
-  Region_Hackathon: 0.15,
+  Region_Fundamentals:  0.0,
+  Region_OOP:           0.0,
+  Region_DataStructures:0.0,
+  Region_Algorithms:    0.0,
+  Region_Systems:       0.0,
+  Region_Frontend:      0.0,
+  Region_DevPractices:  0.0,
+  Region_Product:       0.0,
+  Region_Hackathon:     0.0,
 }
 
 export interface BrainSceneProps {
