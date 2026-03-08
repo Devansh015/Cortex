@@ -81,3 +81,35 @@ export interface ScoreUploadRequest {
 export interface ApiError {
   detail: string
 }
+
+// ── Chatbot types ─────────────────────────────────────────
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+  timestamp?: string
+}
+
+export interface ChatRequest {
+  message: string
+  conversation_history?: ChatMessage[]
+}
+
+export interface ChatResponse {
+  reply: string
+  suggestions: string[]
+}
+
+export interface InsightItem {
+  category: string
+  title: string
+  detail: string
+  score: number
+}
+
+export interface InsightsResponse {
+  strengths: InsightItem[]
+  growth_areas: InsightItem[]
+  learning_paths: InsightItem[]
+  summary: string
+}

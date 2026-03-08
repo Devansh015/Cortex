@@ -9,6 +9,9 @@ import type {
   HistoryResponse,
   ScoreUploadRequest,
   UploadScoreSnapshot,
+  ChatMessage,
+  ChatResponse,
+  InsightsResponse,
 } from '@/types/api'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
@@ -142,4 +145,28 @@ export function getStoredUserId(): string {
   const newId = generateUserId()
   localStorage.setItem('lumas_user_id', newId)
   return newId
+}
+
+/**
+ * Send a chat message and get AI response
+ */
+export async function sendChatMessage(
+  userId: string,
+  message: string,
+  conversationHistory: ChatMessage[] = []
+): Promise<ChatResponse> {
+  const response = await fetch(`${API_BASE}/chat/${userId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, conversation_history: conversationHistory }),
+  })
+  return handleResponse<ChatResponse>(response)
+}
+
+/**
+ * Get AI-generated insights about the user's profile
+ */
+export async function getInsights(userId: string): Promise<InsightsResponse> {
+  const response = await fetch(`${API_BASE}/chat/${userId}/insights`)
+  return handleResponse<InsightsResponse>(response)
 }
