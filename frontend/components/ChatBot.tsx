@@ -5,7 +5,11 @@ import { useProfile } from '@/context/ProfileContext'
 import { sendChatMessage } from '@/lib/api'
 import type { ChatMessage } from '@/types/api'
 
-export default function ChatBot() {
+interface ChatBotProps {
+  onPanelToggle?: (open: boolean) => void
+}
+
+export default function ChatBot({ onPanelToggle }: ChatBotProps) {
   const { profile } = useProfile()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -14,6 +18,10 @@ export default function ChatBot() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const hasMessages = messages.length > 0 || isTyping
+
+  useEffect(() => {
+    onPanelToggle?.(hasMessages)
+  }, [hasMessages, onPanelToggle])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -121,7 +129,7 @@ export default function ChatBot() {
       </div>
 
       {/* Bottom-center chat bar */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[600px] px-4">
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[600px] px-4">
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-xl border border-white/15 rounded-2xl px-4 py-2.5 shadow-lg shadow-black/40">
           <svg className="w-5 h-5 text-white/30 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -138,7 +146,7 @@ export default function ChatBot() {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !profile || isTyping}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600/80 hover:bg-blue-600 text-white transition-colors disabled:opacity-30 disabled:hover:bg-blue-600/80 shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 hover:bg-white text-black transition-colors disabled:opacity-20 disabled:hover:bg-white/90 shrink-0"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
