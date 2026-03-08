@@ -3,7 +3,6 @@
 import { Suspense, useState, useCallback, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import LowPolyBrain from './LowPolyBrain'
 
 // ── Default proficiency levels (fallback when no data) ──────────
@@ -63,14 +62,7 @@ function Scene({
         dampingFactor={0.08}
       />
 
-      <EffectComposer>
-        <Bloom
-          intensity={0.8}
-          luminanceThreshold={0.25}
-          luminanceSmoothing={0.5}
-          mipmapBlur
-        />
-      </EffectComposer>
+
     </>
   )
 }

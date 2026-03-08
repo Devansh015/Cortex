@@ -17,6 +17,7 @@ import {
   getUploadHistory,
   getStoredUserId,
   parseGitHubUrl,
+  resetProfile,
 } from '@/lib/api'
 import {
   aggregateToRegions,
@@ -40,6 +41,7 @@ interface ProfileContextValue extends ProfileState {
   refreshProfile: () => Promise<void>
   uploadGitHubRepo: (url: string) => Promise<ProfileUpdateSummary>
   uploadPdf: (content: string, filename: string) => Promise<ProfileUpdateSummary>
+  resetSession: () => Promise<void>
   clearError: () => void
 }
 
@@ -196,13 +198,41 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setState(s => ({ ...s, error: null }))
   }, [])
 
+  // Reset session — wipe all scores and uploads
+  const resetSession = useCallback(async () => {
+    if (!state.userId) return
+
+    setState(s => ({ ...s, isLoading: true, error: null }))
+    try {
+      const profile = await resetProfile(state.userId)
+      const regionScores = aggregateToRegions(profile.category_scores)
+
+      setState(s => ({
+        ...s,
+        profile,
+        regionScores,
+        uploads: [],
+        isLoading: false,
+        lastUpdate: null,
+        error: null,
+      }))
+    } catch (err) {
+      setState(s => ({
+        ...s,
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Failed to reset session',
+      }))
+    }
+  }, [state.userId])
+
   const value = useMemo(() => ({
     ...state,
     refreshProfile,
     uploadGitHubRepo,
     uploadPdf,
+    resetSession,
     clearError,
-  }), [state, refreshProfile, uploadGitHubRepo, uploadPdf, clearError])
+  }), [state, refreshProfile, uploadGitHubRepo, uploadPdf, resetSession, clearError])
 
   return (
     <ProfileContext.Provider value={value}>

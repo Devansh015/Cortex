@@ -16,7 +16,7 @@ const BrainScene = dynamic(() => import('@/components/BrainScene'), {
 })
 
 export default function Home() {
-  const { regionScores, isLoading, profile } = useProfile()
+  const { regionScores, isLoading, profile, resetSession } = useProfile()
   const [showUploadPanel, setShowUploadPanel] = useState(false)
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
 
@@ -40,71 +40,35 @@ export default function Home() {
           <div className="text-white/90 font-semibold text-xl tracking-tight">
             LUMAS
           </div>
-          <button
-            onClick={() => setShowUploadPanel(true)}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Project
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={resetSession}
+              className="px-4 py-2 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-white/70 hover:text-white text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create New Session
+            </button>
+            <button
+              onClick={() => setShowUploadPanel(true)}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Project
+            </button>
+          </div>
         </header>
         
         {/* Main Hero Text */}
-        <div className="flex-1 flex items-center justify-start md:justify-start pointer-events-auto">
-          <div className="max-w-xl">
-            <h1 className="text-4xl md:text-6xl font-light text-white text-glow leading-tight mb-6">
-              Your Skills
-              <br />
-              <span className="text-white/40">Visualized</span>
-            </h1>
-            <p className="text-white/50 text-lg md:text-xl font-light leading-relaxed mb-8">
-              {profile && profile.upload_count > 0 ? (
-                <>
-                  Each region represents a skill area. 
-                  Brightness shows your proficiency based on {profile.upload_count} analyzed project{profile.upload_count > 1 ? 's' : ''}.
-                </>
-              ) : (
-                <>
-                  Add your projects to see how your skills connect. 
-                  Each region will light up based on what you've built.
-                </>
-              )}
-            </p>
-            
-            {/* Dynamic Legend based on actual scores */}
-            <div className="flex items-center gap-6 text-sm text-white/40">
-              {isLoading ? (
-                <span className="text-white/30">Loading profile...</span>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-white/30 pulse-indicator"></span>
-                    <span>Learning</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-white/60"></span>
-                    <span>Developing</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"></span>
-                    <span>Proficient</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <div className="flex-1" />
         
         {/* Footer */}
         <footer className="flex items-end justify-between pointer-events-auto">
           <div className="text-white/30 text-xs">
             © 2026 Lumas
-          </div>
-          <div className="text-white/30 text-xs text-right">
-            <div>Skills mapped from your projects</div>
-            <div className="text-white/20">AI-powered analysis</div>
           </div>
         </footer>
       </div>
