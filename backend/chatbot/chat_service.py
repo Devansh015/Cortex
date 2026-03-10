@@ -36,10 +36,15 @@ from .models import (
     InsightsResponse,
 )
 
-# Load .env from project root
+# Load .env — walk upward to find it (works locally & on Railway)
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+    _p = Path(__file__).resolve().parent
+    while _p != _p.parent:
+        if (_p / ".env").exists():
+            load_dotenv(_p / ".env")
+            break
+        _p = _p.parent
 except ImportError:
     pass
 
