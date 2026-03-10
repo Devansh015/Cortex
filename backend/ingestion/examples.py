@@ -5,7 +5,7 @@ Demonstrates all major features and integration patterns.
 
 import os
 from pathlib import Path
-from backend.ingestion import (
+from ingestion import (
     IngestionPipeline,
     ingest_input,
     BackboardMemoryAdapter,
