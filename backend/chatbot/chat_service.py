@@ -42,7 +42,7 @@ try:
     _p = Path(__file__).resolve().parent
     while _p != _p.parent:
         if (_p / ".env").exists():
-            load_dotenv(_p / ".env")
+            load_dotenv(_p / ".env", override=False)
             break
         _p = _p.parent
 except ImportError:
