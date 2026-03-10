@@ -6,13 +6,13 @@ Run with: uvicorn backend.main:app --reload --port 8000
 
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.chatbot.router import router as chat_router
-from backend.profile_scoring.router import router as profile_router
+from chatbot.router import router as chat_router
+from profile_scoring.router import router as profile_router
 
 app = FastAPI(
     title="Cortex API",
