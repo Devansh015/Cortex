@@ -41,10 +41,10 @@ function Scene({
     <>
       <PerspectiveCamera makeDefault position={[0, 0.3, 3.8]} fov={45} />
 
-      <ambientLight intensity={0.15} />
-      <directionalLight position={[5, 5, 5]} intensity={0.3} color="#ffffff" />
-      <directionalLight position={[-5, 3, -5]} intensity={0.2} color="#6366f1" />
-      <pointLight position={[0, 2, 4]} intensity={0.25} color="#60a5fa" />
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[5, 5, 5]} intensity={0.4} color="#ffffff" />
+      <directionalLight position={[-5, 3, -5]} intensity={0.25} color="#6366f1" />
+      <pointLight position={[0, 2, 4]} intensity={0.3} color="#60a5fa" />
 
       <Suspense fallback={null}>
         <LowPolyBrain

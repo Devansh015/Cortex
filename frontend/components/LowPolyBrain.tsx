@@ -416,17 +416,18 @@ export default function LowPolyBrain({
 
       if (activationT > 0.01) regionActivatedCount[ri]++
 
-      // Idle color (white with subtle pulse)
+      // Idle color: tinted with region color for visual separation between regions
       const basePulse = Math.sin(time * 1.2 + i * 0.2) * 0.1 + 0.9
-      const idleColor = whiteColor.clone().multiplyScalar(0.35 * basePulse)
+      const idleBase = whiteColor.clone().multiplyScalar(0.5 * basePulse)
+      const idleColor = idleBase.clone().lerp(regionColors[ri], 0.25) // Add region tint
 
       // Region color at full vibrancy (used for both intro & BFS)
       const regionFullColor = regionColors[ri].clone()
       const pulse = Math.sin(time * 2.0 + i * 0.3) * 0.15 + 0.85
-      regionFullColor.multiplyScalar(pulse * (hoverBright ? 1.4 : 1.0))
+      regionFullColor.multiplyScalar(pulse * (hoverBright ? 1.8 : 1.0))
 
-      // BFS lerp factor: timing * proficiency — low proficiency stays mostly idle
-      const bfsLerp = activationT * proficiency
+      // BFS lerp factor: non-linear scaling ensures low proficiency still shows visible color
+      const bfsLerp = activationT * (0.3 + 0.7 * Math.pow(proficiency, 0.5))
 
       // Combine: intro shows full region colors, BFS shows proficiency-scaled colors
       // effective lerp = max(introFactor, bfsLerp) so intro overrides when active
@@ -437,12 +438,13 @@ export default function LowPolyBrain({
       nCol.array[i * 3 + 1] = color.g
       nCol.array[i * 3 + 2] = color.b
 
-      // Size: scale by effective lerp
+      // Size: scale by effective lerp with proficiency-based scaling for stronger contrast
       const idleSizePulse = Math.sin(time * 1.2 + i * 0.3) * 0.002 + 1
-      const idleSize = 0.016 * idleSizePulse
-      const activeBaseSize = 0.032
+      const idleSize = 0.012 * idleSizePulse
+      const activeBaseSize = 0.045
+      const proficiencyScale = 0.7 + 0.3 * proficiency // Higher proficiency = larger nodes
       const activeSizePulse = Math.sin(time * 1.5 + i * 0.5) * 0.003 + 1
-      const activeSize = activeBaseSize * activeSizePulse * (hoverBright ? 1.3 : 1.0)
+      const activeSize = activeBaseSize * proficiencyScale * activeSizePulse * (hoverBright ? 1.3 : 1.0)
       ;(nSize.array as Float32Array)[i] = idleSize + (activeSize - idleSize) * effectiveLerp
     }
     nCol.needsUpdate = true
@@ -466,25 +468,29 @@ export default function LowPolyBrain({
 
     // ── Update edge colours with BFS activation ───────────
     const eCol = edgeLinesRef.current.geometry.attributes.color as THREE.BufferAttribute
-    const edgeWhite = 0.18
+    const edgeWhite = 0.22
     for (let i = 0; i < edges.length; i++) {
       const [a, b] = edges[i]
       const ra = nodes[a].region, rb = nodes[b].region
+
+      // Inter-region edges are dimmed to create visual "seams" between regions
+      const isInterRegion = ra !== rb
+      const interRegionDim = isInterRegion ? 0.35 : 1.0
 
       // Edge BFS activation: only count endpoints in scored regions, scale by proficiency
       const aScored = scoredRegionSet.has(ra)
       const bScored = scoredRegionSet.has(rb)
       const profA = proficiencyLevels?.[regions[ra].id] ?? 0
       const profB = proficiencyLevels?.[regions[rb].id] ?? 0
-      const bfsTa = (activatedAt[a] < Infinity && aScored) ? Math.min(1, (time - activatedAt[a]) / NODE_FADE_DURATION) * profA : 0
-      const bfsTb = (activatedAt[b] < Infinity && bScored) ? Math.min(1, (time - activatedAt[b]) / NODE_FADE_DURATION) * profB : 0
+      const bfsTa = (activatedAt[a] < Infinity && aScored) ? Math.min(1, (time - activatedAt[a]) / NODE_FADE_DURATION) * (0.3 + 0.7 * Math.pow(profA, 0.5)) : 0
+      const bfsTb = (activatedAt[b] < Infinity && bScored) ? Math.min(1, (time - activatedAt[b]) / NODE_FADE_DURATION) * (0.3 + 0.7 * Math.pow(profB, 0.5)) : 0
       const edgeBfsT = Math.min(bfsTa, bfsTb)
 
       // Effective edge lerp: max of intro and BFS
       const edgeT = Math.max(introFactor, edgeBfsT)
 
-      const edgeColorA = regionColors[ra].clone().multiplyScalar(0.5)
-      const edgeColorB = regionColors[rb].clone().multiplyScalar(0.5)
+      const edgeColorA = regionColors[ra].clone().multiplyScalar(0.85 * interRegionDim)
+      const edgeColorB = regionColors[rb].clone().multiplyScalar(0.85 * interRegionDim)
 
       // Lerp from white to region color
       eCol.array[i * 6 + 0] = edgeWhite + (edgeColorA.r - edgeWhite) * edgeT
@@ -563,7 +569,7 @@ export default function LowPolyBrain({
     <group ref={groupRef} rotation={[0, -Math.PI / 2, 0]}>
       {/* Edge connection lines */}
       <lineSegments ref={edgeLinesRef} geometry={edgeGeometry}>
-        <lineBasicMaterial vertexColors transparent opacity={0.35} depthWrite={false} />
+        <lineBasicMaterial vertexColors transparent opacity={0.55} depthWrite={false} />
       </lineSegments>
 
       {/* Node points (interactive) */}
