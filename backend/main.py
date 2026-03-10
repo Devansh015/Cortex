@@ -22,11 +22,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow frontend origins from env or fall back to localhost defaults
+
+# CORS — allow frontend origins from env or fall back to localhost defaults (with trailing slashes and Vercel)
 _default_origins = [
     "http://localhost:3000",
+    "http://localhost:3000/",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:3000/",
     "http://localhost:3001",
+    "http://localhost:3001/",
+    "https://your-frontend.vercel.app/",
 ]
 _env_origins = os.getenv("CORS_ORIGINS", "")
 cors_origins = [o.strip() for o in _env_origins.split(",") if o.strip()] if _env_origins else _default_origins

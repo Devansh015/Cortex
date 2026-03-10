@@ -5,3 +5,4 @@ pydantic
 requests
 google-genai
 PyPDF2
+python-multipart

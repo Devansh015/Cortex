@@ -136,17 +136,12 @@ Scores translate into meaningful labels:
 - A **Google Gemini API key**
 
 ---
-
 ## 1️⃣ Clone & install
 
 ```bash
 git clone https://github.com/Devansh015/HackCanada.git
 cd HackCanada
-```
 
----
-
-## 2️⃣ Backend setup
 
 ```bash
 pip3 install fastapi uvicorn pydantic python-dotenv google-genai requests
