@@ -14,7 +14,8 @@ import type {
   InsightsResponse,
 } from '@/types/api'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+const API_ROOT = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+const API_BASE = `${API_ROOT}/api`
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -74,7 +75,11 @@ export async function getTopCategories(
   limit: number = 10
 ): Promise<{ category: string; score: number }[]> {
   const response = await fetch(`${API_BASE}/profile/${userId}/top?limit=${limit}`)
-  const data = await handleResponse<{ success: boolean; top: { category: string; score: number }[]; upload_count: number }>(response)
+  const data = await handleResponse<{
+    success: boolean
+    top: { category: string; score: number }[]
+    upload_count: number
+  }>(response)
   return data.top
 }
 
@@ -90,10 +95,16 @@ export async function scoreUpload(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   })
-  const data = await handleResponse<{ success: boolean; summary: ProfileUpdateSummary; error: string | null }>(response)
+  const data = await handleResponse<{
+    success: boolean
+    summary: ProfileUpdateSummary
+    error: string | null
+  }>(response)
+
   if (!data.success || !data.summary) {
     throw new ApiError(422, data.error || 'Scoring failed')
   }
+
   return data.summary
 }
 
@@ -138,10 +149,10 @@ export function generateUserId(): string {
  */
 export function getStoredUserId(): string {
   if (typeof window === 'undefined') return generateUserId()
-  
+
   const stored = localStorage.getItem('cortex_user_id')
   if (stored) return stored
-  
+
   const newId = generateUserId()
   localStorage.setItem('cortex_user_id', newId)
   return newId
