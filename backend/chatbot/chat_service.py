@@ -18,13 +18,13 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from backend.profile_scoring.categories import (
+from profile_scoring.categories import (
     CATEGORY_GROUPS,
     CATEGORY_KEYS,
     CATEGORY_MAP,
 )
-from backend.profile_scoring.models import UserProfile
-from backend.profile_scoring.profile_manager import (
+from profile_scoring.models import UserProfile
+from profile_scoring.profile_manager import (
     get_upload_history,
     get_user_profile,
 )
