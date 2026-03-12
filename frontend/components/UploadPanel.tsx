@@ -84,14 +84,17 @@ export default function UploadPanel({ onClose }: UploadPanelProps) {
   }, [uploadPdf])
 
   return (
-    <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 w-full max-w-md">
+    <div className="bg-black/95 sm:bg-black/80 backdrop-blur-xl border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 w-full sm:max-w-md">
+      {/* Mobile drag handle */}
+      <div className="sm:hidden w-12 h-1 bg-white/30 rounded-full mx-auto mb-4" />
+      
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-white text-lg font-medium">Add Project</h2>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-white text-base sm:text-lg font-medium">Add Project</h2>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white/80 transition-colors"
+            className="text-white/40 hover:text-white/80 transition-colors p-1 min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -123,21 +126,21 @@ export default function UploadPanel({ onClose }: UploadPanelProps) {
       )}
 
       {/* GitHub URL Input */}
-      <form onSubmit={handleGitHubSubmit} className="mb-6">
-        <label className="block text-white/60 text-sm mb-2">GitHub Repository</label>
-        <div className="flex gap-2">
+      <form onSubmit={handleGitHubSubmit} className="mb-4 sm:mb-6">
+        <label className="block text-white/60 text-xs sm:text-sm mb-2">GitHub Repository</label>
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="url"
             value={githubUrl}
             onChange={(e) => setGithubUrl(e.target.value)}
             placeholder="https://github.com/owner/repo"
-            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 transition-colors"
+            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 transition-colors min-h-[44px]"
             disabled={isUploading}
           />
           <button
             type="submit"
             disabled={isUploading || !githubUrl.trim()}
-            className="px-4 py-3 bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 border border-white/10 rounded-lg text-white text-sm font-medium transition-colors"
+            className="px-4 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 border border-white/10 rounded-lg text-white text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
           >
             {isUploading ? (
               <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -152,7 +155,7 @@ export default function UploadPanel({ onClose }: UploadPanelProps) {
       </form>
 
       {/* Divider */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-4 sm:mb-6">
         <div className="flex-1 h-px bg-white/10" />
         <span className="text-white/30 text-xs">or</span>
         <div className="flex-1 h-px bg-white/10" />
@@ -164,7 +167,7 @@ export default function UploadPanel({ onClose }: UploadPanelProps) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
+          relative border-2 border-dashed rounded-xl p-4 sm:p-8 text-center transition-colors cursor-pointer
           ${isDragging 
             ? 'border-blue-500/50 bg-blue-500/10' 
             : 'border-white/10 hover:border-white/20 hover:bg-white/5'
@@ -180,11 +183,11 @@ export default function UploadPanel({ onClose }: UploadPanelProps) {
           disabled={isUploading}
         />
         <div className="text-white/40 mb-2">
-          <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 sm:w-8 sm:h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </div>
-        <div className="text-white/60 text-sm">Drop PDF here</div>
+        <div className="text-white/60 text-xs sm:text-sm">Drop PDF here</div>
         <div className="text-white/30 text-xs mt-1">or click to browse</div>
       </div>
 

@@ -60,14 +60,19 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
 
   return (
     <>
-      {/* Right-side message panel */}
+      {/* Right-side message panel - responsive: bottom sheet on mobile, side panel on desktop */}
       <div
-        className={`fixed top-0 right-0 z-40 w-[380px] h-full flex flex-col bg-black/70 backdrop-blur-xl border-l border-white/10 transition-transform duration-300 ${
-          hasMessages ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed z-40 flex flex-col bg-black/90 sm:bg-black/70 backdrop-blur-xl border-white/10 transition-all duration-300 
+          inset-x-0 bottom-0 h-[85vh] rounded-t-2xl border-t sm:border-l sm:border-t-0 sm:rounded-none
+          sm:top-0 sm:right-0 sm:left-auto sm:h-full sm:w-[320px] md:w-[380px]
+          ${hasMessages ? 'translate-y-0 sm:translate-y-0 sm:translate-x-0' : 'translate-y-full sm:translate-y-0 sm:translate-x-full'}
+        `}
       >
+        {/* Mobile drag handle */}
+        <div className="sm:hidden w-12 h-1 bg-white/30 rounded-full mx-auto mt-2 mb-1" />
+        
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/10 flex items-center justify-between">
           <div>
             <h3 className="text-white font-semibold text-sm">CORTEX AI</h3>
             <p className="text-white/40 text-xs mt-0.5">Skills &amp; learning insights</p>
@@ -84,11 +89,11 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 sm:py-3 space-y-2 sm:space-y-3">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[85%] px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-blue-600/80 text-white rounded-br-md'
                     : 'bg-white/10 text-white/90 rounded-bl-md'
@@ -114,12 +119,12 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
 
         {/* Suggestion Chips */}
         {suggestions.length > 0 && (
-          <div className="px-4 pb-3 flex flex-wrap justify-center gap-1.5 border-t border-white/5 pt-3">
+          <div className="px-3 sm:px-4 pb-2 sm:pb-3 flex flex-wrap justify-center gap-1 sm:gap-1.5 border-t border-white/5 pt-2 sm:pt-3">
             {suggestions.map((s, i) => (
               <button
                 key={i}
                 onClick={() => handleSend(s)}
-                className="px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white/70 hover:text-white transition-colors"
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white/70 hover:text-white transition-colors"
               >
                 {s}
               </button>
@@ -129,9 +134,9 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
       </div>
 
       {/* Bottom-center chat bar */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[600px] px-4">
-        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-xl border border-white/15 rounded-2xl px-4 py-2.5 shadow-lg shadow-black/40">
-          <svg className="w-5 h-5 text-white/30 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="fixed bottom-4 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[calc(100%-2rem)] sm:max-w-[600px]">
+        <div className="flex items-center gap-2 bg-black/90 sm:bg-black/60 backdrop-blur-xl border border-white/20 rounded-full sm:rounded-2xl px-4 py-2.5 sm:py-3 shadow-lg shadow-black/50">
+          <svg className="w-5 h-5 text-white/40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
           <input
@@ -139,14 +144,14 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={profile ? 'Ask CORTEX about your skills...' : 'Upload a project first'}
+            placeholder={profile ? 'Ask about your skills...' : 'Upload a project first'}
             disabled={!profile || isTyping}
-            className="flex-1 bg-transparent text-sm text-white placeholder-white/30 outline-none disabled:opacity-40"
+            className="flex-1 bg-transparent text-sm text-white placeholder-white/40 outline-none disabled:opacity-40 min-w-0"
           />
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !profile || isTyping}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/90 hover:bg-white text-black transition-colors disabled:opacity-20 disabled:hover:bg-white/90 shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white hover:bg-white/90 text-black transition-colors disabled:opacity-30 disabled:hover:bg-white shrink-0"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
