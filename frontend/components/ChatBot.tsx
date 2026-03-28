@@ -38,7 +38,7 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
     setSuggestions([])
 
     try {
-      const history = [...messages, userMsg].slice(-10)
+      const history = messages.slice(-10)
       const data = await sendChatMessage(profile.user_id, message, history)
       const assistantMsg: ChatMessage = { role: 'assistant', content: data.reply }
       setMessages(prev => [...prev, assistantMsg])
@@ -95,8 +95,8 @@ export default function ChatBot({ onPanelToggle }: ChatBotProps) {
               <div
                 className={`max-w-[85%] px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-blue-600/80 text-white rounded-br-md'
-                    : 'bg-white/10 text-white/90 rounded-bl-md'
+                    ? 'bg-blue-600/80 text-white rounded-br-md whitespace-pre-wrap break-words'
+                    : 'bg-white/10 text-white/90 rounded-bl-md whitespace-pre-wrap break-words'
                 }`}
               >
                 {msg.content}

@@ -2,17 +2,21 @@
 node_modules/
 .pnp
 .pnp.js
+frontend/node_modules/
 
 # Build outputs
 .next/
 out/
 build/
 dist/
+frontend/.next/
+coverage/
 
 # Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # Local env files
 .env
@@ -20,6 +24,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+frontend/.env.local
 
 # Vercel
 .vercel
@@ -40,6 +45,11 @@ Thumbs.db
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
+venv/
 
 # Backend test data
 backend/ingestion/test_cases/

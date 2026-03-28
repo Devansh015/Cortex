@@ -18,16 +18,28 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from profile_scoring.categories import (
-    CATEGORY_GROUPS,
-    CATEGORY_KEYS,
-    CATEGORY_MAP,
-)
-from profile_scoring.models import UserProfile
-from profile_scoring.profile_manager import (
-    get_upload_history,
-    get_user_profile,
-)
+try:
+    from ..profile_scoring.categories import (
+        CATEGORY_GROUPS,
+        CATEGORY_KEYS,
+        CATEGORY_MAP,
+    )
+    from ..profile_scoring.models import UserProfile
+    from ..profile_scoring.profile_manager import (
+        get_upload_history,
+        get_user_profile,
+    )
+except ImportError:
+    from profile_scoring.categories import (
+        CATEGORY_GROUPS,
+        CATEGORY_KEYS,
+        CATEGORY_MAP,
+    )
+    from profile_scoring.models import UserProfile
+    from profile_scoring.profile_manager import (
+        get_upload_history,
+        get_user_profile,
+    )
 
 from .models import (
     ChatMessage,
@@ -47,6 +59,65 @@ logger = logging.getLogger(__name__)
 
 api_key = os.getenv("GOOGLE_CLOUD_CONSOLE_API_KEY", "")
 model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
+_IMPROVEMENT_KEYWORDS = (
+    "improve",
+    "improvement",
+    "better",
+    "weakness",
+    "weaknesses",
+    "gap",
+    "gaps",
+    "grow",
+    "stronger",
+    "work on",
+    "focus on",
+    "need to learn",
+    "what should i learn",
+    "where can i improve",
+    "how can i improve",
+    "what can i improve",
+    "areas to improve",
+)
+
+_GROUP_GROWTH_RECOMMENDATIONS = {
+    "Fundamentals": ("data_structures", "algorithms", "testing"),
+    "OOP": ("testing", "system_design", "documentation"),
+    "Data Structures": ("algorithms", "time_complexity", "testing"),
+    "Algorithms": ("data_structures", "time_complexity", "testing"),
+    "Systems": ("databases", "testing", "system_design"),
+    "Frontend": ("responsive_design", "testing", "documentation"),
+    "Dev Practices": ("testing", "ci_cd", "documentation"),
+    "Product": ("system_design", "documentation", "testing"),
+    "Hackathon": ("integrations", "system_design", "testing"),
+}
+
+_CATEGORY_ACTION_PHRASES = {
+    "testing": "add a small unit test suite around one real feature and cover an edge case",
+    "databases": "persist one core feature with a real schema instead of keeping everything in memory",
+    "sql": "write a few real queries yourself so the data flow feels deliberate, not automatic",
+    "system_design": "sketch the request flow, data model, and tradeoffs before building the next feature",
+    "documentation": "write a short README that explains setup, architecture, and key decisions",
+    "apis": "tighten one endpoint with validation, error handling, and clearer response shapes",
+    "networking": "trace one request end to end and note headers, latency, and failure cases",
+    "git": "use smaller commits and a cleaner branch flow on your next feature",
+    "ci_cd": "automate linting or tests so every push gets checked",
+    "docker_containers": "containerize one service so the project is easier to run consistently",
+    "cloud_infra": "deploy one service and document env vars, logs, and rollback steps",
+    "algorithms": "solve a couple of targeted problems and write down why your approach fits each one",
+    "time_complexity": "compare runtime tradeoffs before you lock in your next solution",
+    "space_complexity": "compare two solutions and note where the memory tradeoff is worth it",
+    "data_structures": "implement the structure you use most often and explain when you would choose it",
+    "html_css": "rebuild one UI section with cleaner spacing, layout, and semantic structure",
+    "javascript_ts": "tighten your types and simplify any state flows that still feel loose",
+    "react": "break one screen into smaller reusable components with clearer state boundaries",
+    "responsive_design": "polish one screen on mobile and check spacing, accessibility, and hierarchy",
+    "ui_ux": "refine one user flow so the next action is obvious at every step",
+    "project_management": "turn the next feature into a short plan with milestones and visible scope",
+    "prototyping": "ship a narrower first version sooner and validate it before adding extras",
+    "integrations": "connect one outside API end to end and handle failure states cleanly",
+    "problem_solving": "take one vague idea and turn it into a smaller, testable deliverable",
+}
 
 
 # ────────────────────────────────────────────────────────────
@@ -149,10 +220,47 @@ def _upload_history_summary(user_id: str) -> str:
     return "\n".join(lines)
 
 
-def _build_system_prompt(profile: UserProfile) -> str:
+def _is_improvement_question(message: str) -> bool:
+    """Return True when the user is explicitly asking for growth advice."""
+    normalized = " ".join(message.lower().split())
+    return any(keyword in normalized for keyword in _IMPROVEMENT_KEYWORDS)
+
+
+def _build_chat_contents(
+    message: str,
+    conversation_history: Optional[List[ChatMessage]] = None,
+) -> List[dict]:
+    """Build the Gemini contents list and avoid duplicating the latest turn."""
+    contents: List[dict] = []
+    history = list(conversation_history or [])
+
+    if history:
+        last_msg = history[-1]
+        if last_msg.role == "user" and last_msg.content.strip() == message.strip():
+            history = history[:-1]
+
+    for msg in history[-10:]:
+        role = "user" if msg.role == "user" else "model"
+        contents.append({"role": role, "parts": [{"text": msg.content}]})
+
+    contents.append({"role": "user", "parts": [{"text": message}]})
+    return contents
+
+
+def _build_system_prompt(profile: UserProfile, message: str) -> str:
     """Construct the system prompt that grounds the chatbot in the user's data."""
     snapshot = _profile_snapshot(profile)
     uploads = _upload_history_summary(profile.user_id)
+    improvement_focus_rule = ""
+
+    if _is_improvement_question(message):
+        improvement_focus_rule = """
+10. If the user asks how they can improve, what to work on, or what to
+    learn next, spend at most one short sentence on strengths. Then clearly
+    name 1-3 improvement areas and give a concrete next step for each.
+11. Do not end the reply before directly answering the improvement part of
+    the user's question.
+"""
 
     return f"""You are Cortex, a friendly and concise CS learning advisor.
 
@@ -169,7 +277,7 @@ Expert.
 ────────────────────────────────────
 
 Rules (follow strictly):
-1. Keep every reply to 3-4 sentences max. Be direct and helpful.
+1. Keep every reply concise, usually 4-5 sentences max. Be direct and helpful.
 2. NEVER mention or reveal any numeric score, percentage, or number
    between 0 and 1. Only use the level names (Novice, Beginner, etc.).
 3. NEVER use XML-style tags, HTML tags, or any bracket-based markup
@@ -183,7 +291,160 @@ Rules (follow strictly):
 8. If asked about something outside CS, gently redirect.
 9. When relevant, reference the user's actual projects or uploads by
    name/description to make advice concrete and personal.
-"""
+{improvement_focus_rule}"""
+
+
+def _format_list(items: List[str]) -> str:
+    """Format a short list as natural language."""
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
+
+
+def _recent_upload_reference(user_id: str) -> Optional[str]:
+    """Return a compact reference to the user's most recent upload."""
+    history = get_upload_history(user_id)
+    if not history:
+        return None
+
+    preview = " ".join(history[-1].content_preview.strip().split())
+    if not preview:
+        return None
+
+    sanitized = preview.replace("`", "").replace("*", "")
+    if "github.com/" in sanitized:
+        repo = sanitized.rstrip("/").split("/")[-1]
+        return repo[:40]
+
+    words = sanitized.split()
+    return " ".join(words[:4])[:40]
+
+
+def _select_improvement_categories(profile: UserProfile, limit: int = 3) -> List[str]:
+    """Pick concrete next categories that complement the user's current strengths."""
+    scores = profile.category_scores
+    top_categories = profile.get_top_categories(5)
+    strong_keys = {
+        item["category"]
+        for item in top_categories
+        if item["score"] >= 0.45
+    }
+
+    selected: List[str] = []
+    seen_groups = set()
+
+    ranked_weak = sorted(scores.items(), key=lambda kv: kv[1])
+    for key, score in ranked_weak:
+        if key in strong_keys or score == 0.0 or score >= 0.55:
+            continue
+        group = CATEGORY_GROUPS[key]
+        if group in seen_groups:
+            continue
+        selected.append(key)
+        seen_groups.add(group)
+        if len(selected) == limit:
+            return selected
+
+    for item in top_categories:
+        group = CATEGORY_GROUPS.get(item["category"])
+        for candidate in _GROUP_GROWTH_RECOMMENDATIONS.get(group, ()):
+            if candidate in strong_keys or candidate in selected:
+                continue
+            if scores.get(candidate, 0.0) >= 0.55:
+                continue
+            selected.append(candidate)
+            if len(selected) == limit:
+                return selected
+
+    fallback_candidates = (
+        "testing",
+        "documentation",
+        "system_design",
+        "databases",
+        "sql",
+        "ci_cd",
+    )
+    for candidate in fallback_candidates:
+        if candidate in strong_keys or candidate in selected:
+            continue
+        selected.append(candidate)
+        if len(selected) == limit:
+            break
+
+    return selected
+
+
+def _growth_action_phrase(category_key: str) -> str:
+    """Return a concrete next-step phrase for a category."""
+    phrase = _CATEGORY_ACTION_PHRASES.get(category_key)
+    if phrase:
+        return phrase
+
+    label = CATEGORY_MAP.get(category_key, category_key).lower()
+    group = CATEGORY_GROUPS.get(category_key, "")
+    if group == "Systems":
+        return f"build one backend feature that makes your {label} work visible end to end"
+    if group == "Algorithms":
+        return f"practice {label} with a couple of small problems and compare tradeoffs"
+    if group == "Frontend":
+        return f"use {label} in one polished screen that works well on desktop and mobile"
+    if group == "Dev Practices":
+        return f"make {label} part of your normal workflow on the next project"
+    if group == "Product":
+        return f"show stronger {label} by explaining your decisions before and after you build"
+    return f"practice {label} in a focused feature instead of only touching it indirectly"
+
+
+def _build_improvement_reply(profile: UserProfile) -> str:
+    """Build a deterministic answer for 'what should I improve next?' questions."""
+    strong_labels = [
+        CATEGORY_MAP.get(item["category"], item["category"])
+        for item in profile.get_top_categories(3)
+        if item["score"] > 0.1
+    ]
+    improvement_keys = _select_improvement_categories(profile)
+    upload_ref = _recent_upload_reference(profile.user_id)
+
+    if strong_labels:
+        if upload_ref:
+            strength_sentence = (
+                f"Your clearest strengths right now are {_format_list(strong_labels)}, "
+                f"especially in your recent {upload_ref} work."
+            )
+        else:
+            strength_sentence = (
+                f"Your clearest strengths right now are {_format_list(strong_labels)}."
+            )
+    else:
+        strength_sentence = (
+            "I do not have enough strong evidence yet to point to clear strengths."
+        )
+
+    if not improvement_keys:
+        return (
+            f"{strength_sentence} The next best move is to upload one or two more repos, "
+            "assignments, or code samples so I can point to sharper growth areas."
+        )
+
+    improvement_labels = [CATEGORY_MAP.get(key, key) for key in improvement_keys]
+    action_phrases = [_growth_action_phrase(key) for key in improvement_keys]
+
+    reply = (
+        f"{strength_sentence} The clearest next areas to improve are "
+        f"{_format_list(improvement_labels)}. Next, {_format_list(action_phrases)}."
+    )
+
+    if profile.upload_count < 3:
+        reply += (
+            " One more upload that shows testing, data handling, or architecture "
+            "would make this advice even sharper."
+        )
+
+    return reply
 
 
 # ────────────────────────────────────────────────────────────
@@ -211,8 +472,6 @@ def chat_with_profile(
     -------
     ChatResponse with reply text and follow-up suggestions.
     """
-    from google import genai
-
     profile = get_user_profile(user_id)
     if profile is None:
         return ChatResponse(
@@ -223,17 +482,16 @@ def chat_with_profile(
             ],
         )
 
-    system_prompt = _build_system_prompt(profile)
+    if _is_improvement_question(message):
+        return ChatResponse(
+            reply=_build_improvement_reply(profile),
+            suggestions=_generate_suggestions(profile, message),
+        )
 
-    # Build Gemini contents list (multi-turn)
-    contents: list = []
-    if conversation_history:
-        for msg in conversation_history[-10:]:  # keep last 10 turns
-            role = "user" if msg.role == "user" else "model"
-            contents.append({"role": role, "parts": [{"text": msg.content}]})
+    from google import genai
 
-    # Append the new user message
-    contents.append({"role": "user", "parts": [{"text": message}]})
+    system_prompt = _build_system_prompt(profile, message)
+    contents = _build_chat_contents(message, conversation_history)
 
     try:
         client = genai.Client(api_key=api_key)

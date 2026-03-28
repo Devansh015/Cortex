@@ -141,13 +141,14 @@ Scores translate into meaningful labels:
 ```bash
 git clone https://github.com/Devansh015/HackCanada.git
 cd HackCanada
-
-
-```bash
-pip3 install fastapi uvicorn pydantic python-dotenv google-genai requests
 ```
 
----
+## 2️⃣ Backend setup
+
+```bash
+cd backend
+pip3 install -r requirements.txt
+```
 
 ## 3️⃣ Frontend setup
 
@@ -167,6 +168,12 @@ GOOGLE_CLOUD_CONSOLE_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
 ---
 
 ## 5️⃣ Run
@@ -174,7 +181,13 @@ GEMINI_MODEL=gemini-2.5-flash
 ### Backend (from project root)
 
 ```bash
-python3 -m uvicorn backend.main:app --reload --port 8000
+python3 -m uvicorn backend.main:app --reload --port 8080
+```
+
+You can also run it from inside `backend/`:
+
+```bash
+python3 -m uvicorn main:app --reload --port 8080
 ```
 
 ### Frontend (from `frontend/`)

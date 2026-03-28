@@ -1,7 +1,7 @@
 """
 FastAPI application entry point for Cortex backend.
 
-Run locally:  uvicorn main:app --reload --port 8000
+Run locally:  uvicorn main:app --reload --port 8080
 Deploy:       Railway reads Procfile / railway.toml automatically.
 """
 
@@ -13,8 +13,12 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from chatbot.router import router as chat_router
-from profile_scoring.router import router as profile_router
+try:
+    from .chatbot.router import router as chat_router
+    from .profile_scoring.router import router as profile_router
+except ImportError:
+    from chatbot.router import router as chat_router
+    from profile_scoring.router import router as profile_router
 
 app = FastAPI(
     title="Cortex API",

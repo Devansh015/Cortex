@@ -69,7 +69,10 @@ def update_profile_from_upload(
     scoring_content = content
     if source_type == "github_repo":
         try:
-            from ingestion.github_processor import GitHubProcessor
+            try:
+                from ..ingestion.github_processor import GitHubProcessor
+            except ImportError:
+                from ingestion.github_processor import GitHubProcessor
 
             processor = GitHubProcessor()
             result = processor.process(content, user_id)
