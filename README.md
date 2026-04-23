@@ -1,7 +1,7 @@
 # 🧠 Cortex
 **A living 3D brain that visualizes your CS knowledge.**
 
-Upload GitHub repos, PDFs, or text — Cortex scores your skills across **51 categories using Google Gemini**, maps them onto a **glowing interactive brain**, and offers **AI-powered learning advice** through a built-in chatbot.
+Upload GitHub repos, PDFs, or text, Cortex scores your skills across **51 categories using Google Gemini**, maps them onto a **glowing interactive brain**, and offers **AI-powered learning advice** through a built-in chatbot.
 
 Built for **HackCanada 2026**.
 
@@ -278,4 +278,4 @@ http://localhost:3000
 
 # 👥 Team
 
-Built by **Devansh Jain, Yash Soni and Dharm Patel** for **HackCanada 2026**.
+Built by **Devansh Jain, Yash Soni, Dharm Patel and Aryan Kakkar** for **HackCanada 2026**.
