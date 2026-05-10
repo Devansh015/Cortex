@@ -140,6 +140,10 @@ export default function Home() {
 
       {/* AI Chatbot */}
       <ChatBot onPanelToggle={handleChatPanelToggle} />
+
+      <div className="fixed bottom-1 inset-x-0 z-30 px-4 text-center text-[10px] leading-none text-white/25 pointer-events-none whitespace-nowrap">
+        Created by Devansh Jain, Yash Soni, and Dharm Patel
+      </div>
     </main>
   )
 }
